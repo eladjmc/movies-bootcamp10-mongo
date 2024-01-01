@@ -11,7 +11,7 @@ import {
 // @des      Get all the movies
 // @route    GET /api/v1/movies
 // @access   Public
-export const getAllMoviesController  = async (req, res, next) => {
+export const getAllMoviesController = async (req, res, next) => {
   try {
     const movies = await getAllMovies();
     res.send(movies);
@@ -23,7 +23,7 @@ export const getAllMoviesController  = async (req, res, next) => {
 // @des      Get a single movie
 // @route    GET /api/v1/movies/:id
 // @access   Public
-export const getMovieByIdController  = async (req, res, next) => {
+export const getMovieByIdController = async (req, res, next) => {
   try {
     const movie = await getMovieById(req.params.id);
     if (!movie) {
@@ -39,7 +39,7 @@ export const getMovieByIdController  = async (req, res, next) => {
 // @des      Create a movie
 // @route    POST /api/v1/movies
 // @access   Public
-export const createMovieController  = async (req, res, next) => {
+export const createMovieController = async (req, res, next) => {
   try {
     const { title, director, releaseYear, rating } = req.body;
     if (!title || !director || !releaseYear || !rating) {
@@ -72,10 +72,10 @@ export const createMovieController  = async (req, res, next) => {
 // @des      Update a movie
 // @route    PUT /api/v1/movies/:id
 // @access   Public
-export const updateMovieController  = async (req, res, next) => {
+export const updateMovieController = async (req, res, next) => {
   try {
     const { title, director, releaseYear, rating } = req.body;
-    if (!title || !director || !releaseYear || !rating) {
+    if (!title || !director || isNaN(releaseYear) || isNaN(rating)) {
       res.status(STATUS_CODE.BAD_REQUEST);
       throw new Error(
         "All fields (title, director, releaseYear, rating) are required"
@@ -109,13 +109,16 @@ export const updateMovieController  = async (req, res, next) => {
 // @des      delete a movie
 // @route    DELETE /api/v1/movies/:id
 // @access   Public
-export const deleteMovieController  = async (req, res, next) => {
+export const deleteMovieController = async (req, res, next) => {
   try {
-    const deleted = await deleteMovie(req.params.id);
-    if (!deleted) {
+    const movieId = req.params.id;
+    const movie = await getMovieById(movieId);
+    if (!movie) {
       res.status(STATUS_CODE.NOT_FOUND);
       throw new Error("Movie was not found");
     }
+
+    await deleteMovie(movieId);
 
     res
       .status(STATUS_CODE.OK)
