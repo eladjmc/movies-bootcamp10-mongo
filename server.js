@@ -1,12 +1,13 @@
-import 'dotenv/config';
+import "dotenv/config";
 import express from "express";
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import movieRoutes from "./routes/movieRoutes.js";
-import cors from 'cors'
+import cors from "cors";
+import { connectDB } from "./config/db.js";
 const app = express();
 
 // cors middleware
-app.use(cors())
+app.use(cors());
 
 //Middleware for JSON parsing
 app.use(express.json());
@@ -18,6 +19,8 @@ app.use("/api/v1/movies", movieRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 });

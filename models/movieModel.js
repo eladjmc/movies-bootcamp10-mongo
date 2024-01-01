@@ -1,30 +1,35 @@
-import fs from 'fs'
-import { filePath } from '../utils/dataFilePath.js'
 
+import { ObjectId } from 'mongodb';
+import { getDB } from '../config/db.js';
 
-const initializeMovieFile = () => {
-    if(!fs.existsSync(filePath)){
-        fs.writeFileSync(filePath,JSON.stringify([]),'utf8')
-    }
-}
+export const getAllMovies = async () => {
+  const db = getDB();
+  return await db.collection('movies').find({}).toArray();
+};
 
-const readMoviesFromFile = () => {
-    try {
-        initializeMovieFile();
-        const fileData = fs.readFileSync(filePath, 'utf-8');
-        return JSON.parse(fileData)
-    } catch (error) {
-        throw new Error("Error reading from movie file")
-    }
-}
+export const getMovieById = async (id) => {
+  const db = getDB();
+  return await db.collection('movies').findOne({ _id: ObjectId(id) });
+};
 
-const writeMoviesToFile = (movies) => {
-    try {
-        initializeMovieFile();
-        fs.writeFileSync(filePath,JSON.stringify(movies), 'utf-8')
-    } catch (error) {
-        throw new Error("Error writing to the movies file")
-    }
-}
+export const getMovieByTitle = async (title) => {
+    const db = getDB();
+    return await db.collection('movies').findOne({ title: title });
+  };
 
-export {readMoviesFromFile, writeMoviesToFile}
+export const createMovie = async (movie) => {
+  const db = getDB();
+  const result = await db.collection('movies').insertOne(movie);
+  return result.ops[0];
+};
+
+export const updateMovie = async (id, updatedMovie) => {
+  const db = getDB();
+  await db.collection('movies').updateOne({ _id: ObjectId(id) }, { $set: updatedMovie });
+  return getMovieById(id);
+};
+
+export const deleteMovie = async (id) => {
+  const db = getDB();
+  await db.collection('movies').deleteOne({ _id: ObjectId(id) });
+};
